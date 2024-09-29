@@ -3,8 +3,7 @@
 #include <sbi.h>
 #include <stdio.h>
 #include <riscv.h>
-//volatile告诉编译器这个变量可能在其他地方被瞎改一通，
-//所以编译器不要对这个变量瞎优化
+
 volatile size_t ticks;
 
 static inline uint64_t get_cycles(void) {
@@ -14,7 +13,7 @@ static inline uint64_t get_cycles(void) {
     return n;
 #else
     uint32_t lo, hi, tmp;
-    __asm__ __volatile__( //拼接
+    __asm__ __volatile__(
         "1:\n"
         "rdtimeh %0\n"
         "rdtime %1\n"
@@ -39,9 +38,6 @@ void clock_init(void) {
     // divided by 500 when using Spike(2MHz)
     // divided by 100 when using QEMU(10MHz)
     // timebase = sbi_timebase() / 500;
-
-    //设置第一个时钟中断事件
-    
     clock_set_next_event();
 
     // initialize time counter 'ticks' to zero
@@ -51,4 +47,3 @@ void clock_init(void) {
 }
 
 void clock_set_next_event(void) { sbi_set_timer(get_cycles() + timebase); }
-//设置时钟事件(sbi_set_timer)

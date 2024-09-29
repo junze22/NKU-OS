@@ -21,12 +21,6 @@ static void print_ticks() {
 #endif
 }
 
-
-
-
-
-
-
 /**
  * @brief      Load supervisor trap entry in RISC-V
  */
@@ -89,8 +83,6 @@ void print_regs(struct pushregs *gpr) {
 }
 
 void interrupt_handler(struct trapframe *tf) {
-    //抹掉scause最高位代表“这是中断不是异常”的1
-
     intptr_t cause = (tf->cause << 1) >> 1;
     switch (cause) {
         case IRQ_U_SOFT:
@@ -114,23 +106,21 @@ void interrupt_handler(struct trapframe *tf) {
             // In fact, Call sbi_set_timer will clear STIP, or you can clear it
             // directly.
             // cprintf("Supervisor timer interrupt\n");
-             /* LAB1 EXERCISE2   2212995 :  */
+             /* LAB1 EXERCISE2   2212995:  */
             /*(1)设置下次时钟中断- clock_set_next_event()
              *(2)计数器（ticks）加一
              *(3)当计数器加到100的时候，我们会输出一个`100ticks`表示我们触发了100次时钟中断，同时打印次数（num）加一
             * (4)判断打印次数，当打印次数为10时，调用<sbi.h>中的关机函数关机
             */
-       
-            
             clock_set_next_event();//发生这次时钟中断的时候，我们要设置下一次时钟中断
             if (++ticks % TICK_NUM == 0) {
+                if(num>=10){
+                    sbi_shutdown();
+                }
                 print_ticks();
+                num++;
             }
             break;
-        
-
-
-   
         case IRQ_H_TIMER:
             cprintf("Hypervisor software interrupt\n");
             break;
@@ -161,22 +151,29 @@ void exception_handler(struct trapframe *tf) {
             break;
         case CAUSE_FAULT_FETCH:
             break;
-        case CAUSE_ILLEGAL_INSTRUCTION:
-             // 非法指令异常处理
-             /* LAB1 CHALLENGE3   YOUR CODE :  */
-            /*(1)输出指令异常类型（ Illegal instruction）
-             *(2)输出异常指令地址
-             *(3)更新 tf->epc寄存器
-            */
-            break;
+        case CAUSE_ILLEGAL_INSTRUCTION: 
+           // 非法指令异常处理
+            /* LAB1 CHALLENGE3   2210643 :  */
+                // (1) 输出非法指令异常类型
+            cprintf("Exception: Illegal instruction\n");
+
+    // (2) 输出异常发生的指令地址
+            cprintf("Faulting instruction address caught at: 0x%lx\n", tf->epc);
+
+    // (3) 更新 tf->epc 寄存器（例如跳过当前非法指令，避免死循环）
+            tf->epc += 4;  // 跳过这条非法指令
+                break;
         case CAUSE_BREAKPOINT:
-            //断点异常处理
-            /* LAB1 CHALLLENGE3   YOUR CODE :  */
-            /*(1)输出指令异常类型（ breakpoint）
-             *(2)输出异常指令地址
-             *(3)更新 tf->epc寄存器
-            */
-            break;
+                //断点异常处理
+                /* LAB1 CHALLLENGE3   2210643 :  */
+                //*(1)输出指令异常类型（ breakpoint）
+            cprintf("Exception: breakpoint\n");
+
+               // *(2)输出异常指令地址
+            cprintf("Faulting instruction address caught at: 0x%lx\n", tf->epc);
+                //*(3)更新 tf->epc寄存器
+            tf->epc += 4;  // 跳过这条非法指令
+                break;
         case CAUSE_MISALIGNED_LOAD:
             break;
         case CAUSE_FAULT_LOAD:
@@ -201,7 +198,6 @@ void exception_handler(struct trapframe *tf) {
 
 /* trap_dispatch - dispatch based on what type of trap occurred */
 static inline void trap_dispatch(struct trapframe *tf) {
-    //scause的最高位是1，说明trap是由中断引起的
     if ((intptr_t)tf->cause < 0) {
         // interrupts
         interrupt_handler(tf);

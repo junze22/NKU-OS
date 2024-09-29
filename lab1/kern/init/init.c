@@ -1,4 +1,3 @@
-//需要调用中断机制的初始化函数。
 #include <clock.h>
 #include <console.h>
 #include <defs.h>
@@ -18,26 +17,22 @@ int kern_init(void) {
     extern char edata[], end[];
     memset(edata, 0, end - edata);
 
-    cons_init();  // init the console初始化控制台
+    cons_init();  // init the console
 
     const char *message = "(THU.CST) os is loading ...\n";
     cprintf("%s\n\n", message);
 
-    print_kerninfo();//打印内核信息
+    print_kerninfo();
 
     // grade_backtrace();
-    //trap.h的函数，初始化中断
+
     idt_init();  // init interrupt descriptor table
-                 // 初始化中断描述符表（IDT）
 
     // rdtime in mbare mode crashes
-    //clock.h的函数，初始化时钟中断
     clock_init();  // init clock interrupt
-    //初始化时钟中断
 
-    //intr.h的函数，使能中断
     intr_enable();  // enable irq interrupt
-    //调用intr_enable函数启用中断请求（IRQ）
+    
     while (1)
         ;
 }
