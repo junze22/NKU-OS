@@ -105,7 +105,7 @@ alloc_proc(void) {
      //进程状态初始化为 PROC_UNINIT（未初始化）
         proc->state = PROC_UNINIT;
         //分配唯一的进程ID
-        proc->pid = get_pid();
+        proc->pid = -1;
         //进程运行次数初始化为0
         proc->runs = 0;
         //内核栈初始化为NULL（后续会分配内核栈）
@@ -121,7 +121,7 @@ alloc_proc(void) {
         //trapframe指针初始化为NULL（trapframe会在后续创建时分配）
         proc->tf = NULL;
         //CR3寄存器初始化为0（页目录基址寄存器）
-        proc->cr3 = 0;
+        proc->cr3 = boot_cr3;
         //进程标志位初始化为0
         proc->flags = 0;
         //进程名称初始化为空字符串
