@@ -126,9 +126,6 @@ alloc_proc(void) {
         proc->flags = 0;
         //进程名称初始化为空字符串
         memset(proc->name, 0, sizeof(proc->name));
-        //进程链接初始化为空（由操作系统调度器管理）
-        INIT_LIST_HEAD(&proc->list_link);
-        INIT_LIST_HEAD(&proc->hash_link);
 
     }
     return proc;
