@@ -364,13 +364,7 @@ bad_fork_cleanup_kstack: 											//分配内核栈失败
 bad_fork_cleanup_proc:
     kfree(proc);
     goto fork_out;
-fork_out:
-    return ret;
-bad_fork_cleanup_kstack:
-    put_kstack(proc);
-bad_fork_cleanup_proc:
-    kfree(proc);
-    goto fork_out;
+
 }
 
 // do_exit - called by sys_exit
